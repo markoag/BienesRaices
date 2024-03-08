@@ -6,8 +6,18 @@ class Propiedad
 {
     // Base de datos
     protected static $db;
-    protected static $columnasDB = ['id', 'titulo', 'precio', 'imagen', 'descripcion', 'habitaciones',
-    'bano', 'estacionamiento', 'creado', 'vendedorID'];
+    protected static $columnasDB = [
+        'id',
+        'titulo',
+        'precio',
+        'imagen',
+        'descripcion',
+        'habitaciones',
+        'bano',
+        'estacionamiento',
+        'creado',
+        'vendedorID'
+    ];
 
     // Errores
     protected static $errores = [];
@@ -46,6 +56,14 @@ class Propiedad
 
     public function guardar()
     {
+        if (isset($this->id)) {
+            $this->actualizar();
+        } else {
+            $this->crear();
+        }
+    }
+    public function crear()
+    {
         // Sanitizar los datos
         $atributos = $this->sanitizaAtributos();
 
@@ -61,12 +79,37 @@ class Propiedad
         return $resultado;
     }
 
+    public function actualizar()
+    {
+        // Sanitizar los datos
+        $atributos = $this->sanitizaAtributos();
+
+        $valores = [];
+        foreach ($atributos as $key => $value) {
+            $valores[] = "{$key} = '{$value}'";
+        }
+
+        // INSERTAR EN LA BDD
+        $query = "UPDATE propiedades SET ";
+        $query .= join(', ', $valores);
+        $query .= " WHERE id = '" . self::$db->escape_string($this->id) . "' ";
+        $query .= " LIMIT 1";
+
+        $resultado = self::$db->query($query);
+
+        if ($resultado) {
+            // Redireccionar al user
+            header('Location: /admin?resultado=2');
+        }
+    }
+
     // Identificar y unir los atributos de la clase
     public function atributos()
     {
         $atributos = [];
         foreach (self::$columnasDB as $columna) {
-            if ($columna === 'id') continue;
+            if ($columna === 'id')
+                continue;
             $atributos[$columna] = $this->$columna;
         }
         return $atributos;
@@ -86,10 +129,12 @@ class Propiedad
     public function setImagen($imagen)
     {
         // Eliminar la imagen previa
-        // if (!is_null($this->id)) {
-        //     $this->borrarImagen();
-        // }
-
+        if (isset($this->id)) {
+            $existeArchivo = file_exists(CARPETA_IMAGENES . $this->imagen);
+            if ($existeArchivo) {
+                unlink(CARPETA_IMAGENES . $this->imagen);
+            }
+        }
         // Asignar al atributo de imagen el nombre de la imagen
         if ($imagen) {
             $this->imagen = $imagen;
@@ -140,6 +185,13 @@ class Propiedad
         return $resultado;
     }
 
+    // Buscar una propiedad por su id
+    public static function find($id)
+    {
+        $query = "SELECT * FROM propiedades WHERE id = $id";
+        $resultado = self::consultarSQL($query);
+        return array_shift($resultado);
+    }
     public static function consultarSQL($query)
     {
         // Consultar la base de datos
@@ -169,5 +221,15 @@ class Propiedad
         }
 
         return $objeto;
+    }
+
+    // Sincronizar el objeto en memoria con los datos de la BDD
+    public function sincronizar($args = [])
+    {
+        foreach ($args as $key => $value) {
+            if (property_exists($this, $key) && !is_null($value)) {
+                $this->$key = $value;
+            }
+        }
     }
 }

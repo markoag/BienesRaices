@@ -21,19 +21,19 @@ $errores = Propiedad::getErrores();
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     // Crear una nueva instancia
-    $propiedad = new Propiedad($_POST);
-    
-    
+    $propiedad = new Propiedad($_POST['propiedad']);
+
+
     // SUBIDA DE ARCHIVOS
-  
+
 
     // Generar nombre unico
     $nombreImagen = md5(uniqid(rand(), true)) . ".jpg";
 
-     // Setear la imagen
-     // Realizar un resize a la imagen
-     if ($_FILES['imagen']['tmp_name']) {
-        $image = Image::gd()->read($_FILES['imagen']['tmp_name']);
+    // Setear la imagen
+    // Realizar un resize a la imagen
+    if ($_FILES['propiedad']['tmp_name']['imagen']) {
+        $image = Image::gd()->read($_FILES['propiedad']['tmp_name']['imagen']);
         $image->resize(800, 600);
         $propiedad->setImagen($nombreImagen);
     }
@@ -45,7 +45,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         if (!is_dir(CARPETA_IMAGENES)) {
             mkdir(CARPETA_IMAGENES);
         }
-        
+
         // Guardar la imagen en el servidor
         $image->save(CARPETA_IMAGENES . $nombreImagen);
 
@@ -67,7 +67,7 @@ incluirTemplate('header');
 
     <a href="/admin" class="boton boton-verde">Volver</a>
 
-    <?php foreach ($errores as $error) :  ?>
+    <?php foreach ($errores as $error): ?>
         <div class="alerta error">
             <?php echo $error; ?>
         </div>
