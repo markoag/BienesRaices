@@ -1,0 +1,12 @@
+{
+    "name": "taz/bienesraices",
+    "description": "Creando proyecto Poo",
+    "autoload": {
+        "psr-4": {
+            "App\\" :"./classes"
+        }
+    },
+    "require": {
+        "intervention/image": "^3.4"
+    }
+}
