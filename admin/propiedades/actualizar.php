@@ -1,6 +1,7 @@
 <?php
 
 use App\Propiedad;
+use App\Vendedor;
 use Intervention\Image\ImageManager as Image;
 
 require '../../includes/app.php';
@@ -16,9 +17,8 @@ if (!$id) {
 // Consultar para obtener propiedades
 $propiedad = Propiedad::find($id);
 
-// Consultar para obtener vendedores
-$consulta = "SELECT * FROM vendedores";
-$resultado = mysqli_query($db, $consulta);
+// Obterner vendedores
+$vendedores = Vendedor::all();
 
 // Arreglo con msj de errores
 $errores = Propiedad::getErrores();

@@ -2,17 +2,15 @@
 require '../../includes/app.php';
 
 use App\Propiedad;
+use App\Vendedor;
 use Intervention\Image\ImageManager as Image;
 
 estaAutenticado();
 
-$db = conectarDB();
-
 $propiedad = new Propiedad();
 
-// Consultar para obtener vendedores
-$consulta = "SELECT * FROM vendedores";
-$resultado = mysqli_query($db, $consulta);
+// Obterner vendedores
+$vendedores = Vendedor::all();
 
 // Arreglo con msj de errores
 $errores = Propiedad::getErrores();
@@ -50,12 +48,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $image->save(CARPETA_IMAGENES . $nombreImagen);
 
         // Guardar en la base de datos
-        $resultado = $propiedad->guardar();
-
-        if ($resultado) {
-            // Redireccionar al user
-            header('Location: /admin?resultado=1');
-        }
+        $propiedad->guardar();
     }
 }
 
