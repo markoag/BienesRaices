@@ -71,13 +71,30 @@ class ActiveRecord {
     // Eliminar un registro
     public function eliminar()
     {
-        $query = "DELETE FROM " . static::$tabla . " WHERE id = " . self::$db->escape_string($this->id) . " LIMIT 1";
-        $resultado = self::$db->query($query);
-
-        if ($resultado) {
-            $this->borrarImagen();
-            header('location: /admin?resultado=3');
+        try {
+            $query = "DELETE FROM " . static::$tabla . " WHERE id = " . self::$db->escape_string($this->id) . " LIMIT 1";
+            $resultado = self::$db->query($query);
+    
+            if ($resultado) {
+                $this->borrarImagen();
+                header('location: /admin?resultado=3');
+            }
+        } catch (mysqli_sql_exception $e) {
+            if ($e->getCode() == 1451) { // 1451 is the SQLSTATE for 'Cannot delete or update a parent row'
+                // Display your custom error message
+                echo "No se puede eliminar este registro porque está relacionado con otra tabla.";
+            } else {
+                // If the exception is not due to a foreign key constraint, rethrow it
+                throw $e;
+            }
         }
+        // $query = "DELETE FROM " . static::$tabla . " WHERE id = " . self::$db->escape_string($this->id) . " LIMIT 1";
+        // $resultado = self::$db->query($query);
+
+        // if ($resultado) {
+        //     $this->borrarImagen();
+        //     header('location: /admin?resultado=3');
+        // }
     }
 
     // Identificar y unir los atributos de la clase
