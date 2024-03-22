@@ -71,6 +71,8 @@ class ActiveRecord {
     // Eliminar un registro
     public function eliminar()
     {
+        mysqli_report(MYSQLI_REPORT_ERROR | MYSQLI_REPORT_STRICT);
+    
         try {
             $query = "DELETE FROM " . static::$tabla . " WHERE id = " . self::$db->escape_string($this->id) . " LIMIT 1";
             $resultado = self::$db->query($query);
@@ -79,22 +81,14 @@ class ActiveRecord {
                 $this->borrarImagen();
                 header('location: /admin?resultado=3');
             }
-        } catch (mysqli_sql_exception $e) {
-            if ($e->getCode() == 1451) { // 1451 is the SQLSTATE for 'Cannot delete or update a parent row'
-                // Display your custom error message
-                echo "No se puede eliminar este registro porque está relacionado con otra tabla.";
+        } catch (\mysqli_sql_exception $e) {
+            if ($e->getCode() == 1451) { // 1451 es el código de error
+                // Aquí puedes manejar el error, por ejemplo, redirigir a una página de error o mostrar un mensaje
+                echo "<script>alert('No se puede borrar, este registro está relacionado con otros datos');</script>";
             } else {
-                // If the exception is not due to a foreign key constraint, rethrow it
-                throw $e;
+                throw $e; // Si el error es diferente, lo lanzamos de nuevo
             }
         }
-        // $query = "DELETE FROM " . static::$tabla . " WHERE id = " . self::$db->escape_string($this->id) . " LIMIT 1";
-        // $resultado = self::$db->query($query);
-
-        // if ($resultado) {
-        //     $this->borrarImagen();
-        //     header('location: /admin?resultado=3');
-        // }
     }
 
     // Identificar y unir los atributos de la clase
@@ -158,6 +152,13 @@ class ActiveRecord {
     {
         $query = "SELECT * FROM " . static::$tabla;
         
+        return self::consultarSQL($query);
+    }
+
+    // Obtener determinado numero de registros
+    public static function get($cantidad)
+    {
+        $query = "SELECT * FROM " . static::$tabla . " LIMIT " . $cantidad;
         return self::consultarSQL($query);
     }
 

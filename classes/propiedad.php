@@ -51,8 +51,8 @@ class Propiedad extends ActiveRecord {
         if (!$this->precio) {
             self::$errores[] = "Debes añadir un precio";
         }
-        if (strlen($this->descripcion) < 50) {
-            self::$errores[] = "Debes añadir una descripción y min 50 caracteres";
+        if (strlen($this->descripcion) > 200) {
+            self::$errores[] = "Debes añadir una descripción de máximo 200 caracteres";
         }
         if (!$this->habitaciones) {
             self::$errores[] = "Debes agg una habitaciones";
